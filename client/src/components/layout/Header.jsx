@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { Box, AppBar, Toolbar, Typography, IconButton, Tooltip } from '@mui/material';
+import React, { Suspense, lazy, useState } from 'react';
+import { Box, AppBar, Toolbar, Typography, IconButton, Tooltip, Backdrop } from '@mui/material';
 import { Group as GroupIcon, Add as AddIcon, Menu as MenuIcon, Search as SearchIcon, Logout as LogoutIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import SearchDialog from '../specific/Search';
+
+const SearchDialog = lazy(() => import("../specific/Search"));
+const NotificationDialog = lazy(() => import("../specific/Notifications"));
+const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 
 const Header = () => {
   const navigate = useNavigate();
@@ -13,19 +16,19 @@ const Header = () => {
   const [isNotification, setIsNotification] = useState(false);
 
   const handleMobile = () => {
-    setIsMobile((prev) => !prev);
+    setIsMobile(prev => !prev);
   };
 
-  const openSearch = () => {
-    setIsSearch((prev) => !prev);
+  const toggleSearch = () => {
+    setIsSearch(prev => !prev);
   };
 
-  const openNewGroup = () => {
-    setIsNewGroup((prev) => !prev);
+  const toggleNewGroup = () => {
+    setIsNewGroup(prev => !prev);
   };
 
-  const openNotification = () => {
-    setIsNotification((prev) => !prev);
+  const toggleNotification = () => {
+    setIsNotification(prev => !prev);
   };
 
   const navigateToGroup = () => navigate('/groups');
@@ -41,9 +44,7 @@ const Header = () => {
           <Toolbar>
             <Typography
               variant='h6'
-              sx={{
-                display: { xs: "none", sm: "block" },
-              }}
+              sx={{ display: { xs: "none", sm: "block" } }}
             >
               Chat App
             </Typography>
@@ -58,27 +59,27 @@ const Header = () => {
 
             <Box>
               <IconBtn
-                title={'Search'}
+                title='Search'
                 icon={<SearchIcon />}
-                onClick={openSearch}
+                onClick={toggleSearch}
               />
               <IconBtn
-                title={'New Group'}
+                title='New Group'
                 icon={<AddIcon />}
-                onClick={openNewGroup}
+                onClick={toggleNewGroup}
               />
               <IconBtn
-                title={'Manage Groups'}
+                title='Manage Groups'
                 icon={<GroupIcon />}
                 onClick={navigateToGroup}
               />
               <IconBtn
-                title={'Notifications'}
+                title='Notifications'
                 icon={<NotificationsIcon />}
-                onClick={openNotification}
+                onClick={toggleNotification}
               />
               <IconBtn
-                title={'Logout'}
+                title='Logout'
                 icon={<LogoutIcon />}
                 onClick={logoutHandler}
               />
@@ -87,23 +88,25 @@ const Header = () => {
         </AppBar>
       </Box>
 
-      {isSearch && <SearchDialog />}
+      <Suspense fallback={<Backdrop open={true} />}>
+        {isSearch && <SearchDialog />}
+        {isNotification && <NotificationDialog />}
+        {isNewGroup && <NewGroupDialog />}
+      </Suspense>
     </>
   );
 };
 
-const IconBtn = ({ title, icon, onClick }) => {
-  return (
-    <Tooltip title={title}>
-      <IconButton
-        color='inherit'
-        size='large'
-        onClick={onClick}
-      >
-        {icon}
-      </IconButton>
-    </Tooltip>
-  );
-};
+const IconBtn = ({ title, icon, onClick }) => (
+  <Tooltip title={title}>
+    <IconButton
+      color='inherit'
+      size='large'
+      onClick={onClick}
+    >
+      {icon}
+    </IconButton>
+  </Tooltip>
+);
 
 export default Header;
